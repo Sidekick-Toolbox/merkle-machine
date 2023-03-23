@@ -14,6 +14,7 @@ const getProofs = (
   const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
 
   const proofs: { [address: string]: string[] } = {};
+  const reportingInterval = 30;
 
   for (let i = startingIndex; i < startingIndex + chunkSize; i++) {
     const address = addresses?.[i]?.toLowerCase();
@@ -22,9 +23,8 @@ const getProofs = (
     }
     proofs[address] = getMerkleProof(tree, address);
 
-    // Report every 100 addresses
-    if (i % 100 === 0) {
-      postMessage({ type: "progress" });
+    if (i % reportingInterval === 0 && i !== startingIndex) {
+      postMessage({ type: "progress", progress: reportingInterval });
     }
   }
 

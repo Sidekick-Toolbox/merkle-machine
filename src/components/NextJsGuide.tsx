@@ -18,12 +18,22 @@ const NextJsGuide = () => {
         </div>
 
         <p className="mt-4">
+          The proofs.ts file will be huge if you have a big collection.
+          <br />
+          It doesn't matter, it is still faster than generating the proof on the
+          fly.
+        </p>
+
+        <p className="mt-4">
           To get the proof call /api/merkle with a GET request
           <br /> and address as a query parameter.
           <br />
           <br />
           Example: <br />
-          <Link href="/api/merkle?address=0x70804f88A50090770cBdA783d52160E7E95d7822" target={"_blank"}>
+          <Link
+            href="/api/merkle?address=0x70804f88A50090770cBdA783d52160E7E95d7822"
+            target={"_blank"}
+          >
             <span className="text-blue-500">
               /api/merkle?address=0x70804f88A50090770cBdA783d52160E7E95d7822
             </span>

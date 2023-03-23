@@ -1,25 +1,25 @@
 import { CodeBlock, irBlack } from "react-code-blocks";
 
-const SolidityCodeSnippet = () => {
-    const codeString =
-`// SPDX-License-Identifier: MIT
+const SolidityOptimizedSnippet = () => {
+  const codeString = `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
 import "erc721a/contracts/ERC721A.sol";
 import "vectorized/solady/src/utils/MerkleProofLib.sol";
 import "vectorized/solady/src/auth/Ownable.sol";
 
-
 contract WhitelistMint is ERC721A, Ownable {
-
     error InvalidProof();
     error AlreadyMinted();
 
     bytes32 merkleRoot;
 
     constructor(bytes32 _merkleRoot) ERC721A("WhitelistMint", "WM") {
-        merkleRoot = _merkleRoot; // Adds initial merkle root.
-        _initializeOwner(msg.sender); // Initializes the owner directly without authorization guard.
+        // Adds initial merkle root.
+        merkleRoot = _merkleRoot; 
+
+        // Initializes the owner directly without authorization guard.
+        _initializeOwner(msg.sender); 
     }
 
     /// @dev Mints a token to the msg.sender, if the merkle proof is valid.
@@ -29,10 +29,12 @@ contract WhitelistMint is ERC721A, Ownable {
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
         if (!MerkleProofLib.verifyCalldata(_merkleProof, merkleRoot, leaf)) revert InvalidProof(); 
 
-        if (_getAux(msg.sender) != 0) revert AlreadyMinted(); // We check if the proof has been used before.
+        // We check if the proof has been used before.
+        if (_getAux(msg.sender) != 0) revert AlreadyMinted(); 
 
-        _setAux(msg.sender, 1); // We set the aux to 1, to indicate that the proof has been used.
-        _mint(msg.sender, 1); // to, quantity
+        // We set the aux to 1, to indicate that the proof has been used.
+        _setAux(msg.sender, 1); 
+        _mint(msg.sender, 1);
     }
 
     /// @dev Sets the merkle root to a new value.
@@ -42,19 +44,18 @@ contract WhitelistMint is ERC721A, Ownable {
     }
 }`;
 
-    return (
-        <div className="text-xs border pr-4">
-            <CodeBlock
-                text={codeString}
-                language={"typescript"}
-                showLineNumbers={true}
-                theme={irBlack}
-                startingLineNumber={1}
-                wrapLines
+  return (
+    <div className="text-xs border pr-4">
+      <CodeBlock
+        text={codeString}
+        language={"typescript"}
+        showLineNumbers={true}
+        theme={irBlack}
+        startingLineNumber={1}
+        wrapLines
+      />
+    </div>
+  );
+};
 
-            />
-        </div>
-    );
-}
-
-export default SolidityCodeSnippet;
+export default SolidityOptimizedSnippet;

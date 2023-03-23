@@ -1,14 +1,12 @@
 import { generateNextJsApiCode, generateProofsCode } from "./codeGenration";
 
-export const downloadAsNextJsApi = async (proofs: {
-  [key: string]: string[];
-}): Promise<void> => {
-  // Generate the code for the Next.js API handler
+export const downloadMerkleTs = () => {
   const apiCode = generateNextJsApiCode();
-  const proofsCode = generateProofsCode(proofs);
-
-  // Download the code as a TypeScript file
   downloadTypescriptFile(apiCode, "merkle");
+};
+
+export const downloadProofsTs = (proofs: { [key: string]: string[] }) => {
+  const proofsCode = generateProofsCode(proofs);
   downloadTypescriptFile(proofsCode, "proofs");
 };
 

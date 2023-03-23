@@ -6,16 +6,18 @@ import MerkleTree from "merkletreejs";
 import keccak256 from "keccak256";
 
 import {
-  downloadAsNextJsApi,
   downloadProofsAsJSON,
+  downloadProofsTs,
   downloadRootAsTxt,
 } from "../download";
 import NextJsGuide from "@/components/NextJsGuide";
-import SolidityCodeSnippet from "@/components/SolidityCodeSnippet";
+import SolidityOptimizedCodeSnippet from "@/components/SolidityOptimizedSnippet";
+import SolidityCodeSnippet from "@/components/SoliditySnippet";
 import SectionTitle from "@/components/SectionTitle";
 import Button from "../components/Button";
 import Section from "@/components/Section";
 import Link from "next/link";
+import { downloadMerkleTs } from "../download";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,7 +44,11 @@ export default function Home() {
   const [merkleRoot, setMerkleRoot] = useState<string>("");
   const [addressCount, setAddressCount] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [snippetBeingShowed, setSnippetBeingShowed] = useState<
+    "optimized" | "unoptimized"
+  >("optimized");
 
+  const [proofsPerSecond, setProofsPerSecond] = useState(0);
   const [percentageProgress, setPercentageProgress] = useState(0);
   const [creatingMerkleTree, setCreatingMerkleTree] = useState(false);
 
@@ -78,21 +84,25 @@ export default function Home() {
   };
 
   const createMerkleTree = async () => {
+    if (creatingMerkleTree) return;
+
     setCreatingMerkleTree(true);
     setPercentageProgress(0);
 
     let proofs: { [address: string]: string[] } = {};
 
-    const maxWorkers = 5;
-    const desiredChunkSize = 1000;
+    const maxWorkers = 8;
+    const desiredChunkSize = 500;
     const workerCount = Math.min(
       Math.ceil(addresses.length / desiredChunkSize),
       maxWorkers
     );
     const chunkSize = Math.ceil(addresses.length / workerCount);
 
+    const timeBefore = Date.now();
     let progress = 0;
     let finishedWorkers = 0;
+
     for (let i = 0; i < workerCount; i++) {
       const worker = new Worker(new URL(".././worker.ts", import.meta.url));
 
@@ -105,11 +115,18 @@ export default function Home() {
         const { type } = e.data;
 
         if (type === "progress") {
-          progress += 100;
-          // Round to closest int
+          progress += e.data.progress;
           setPercentageProgress(
             Math.round((progress / addresses.length) * 100)
           );
+
+          // Only use the first worker to calculate proofs per second
+          if (i !== 0) return;
+          // Calculate proofs per second
+          const timeAfter = Date.now();
+          const timeDiff = timeAfter - timeBefore;
+          const proofsPerSecond = Math.round(progress / (timeDiff / 1000));
+          setProofsPerSecond(proofsPerSecond);
         } else if (type === "proofs") {
           const { proofs: generatedProofs } = e.data;
           proofs = { ...proofs, ...generatedProofs };
@@ -151,7 +168,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main
-        className={`${inter.variable} ${ibm.variable} ${ibmMono.variable} flex flex-col items-center max-w-5xl gap-y-12 mx-auto py-20 antialiased`}
+        className={`${inter.variable} ${ibm.variable} ${ibmMono.variable} flex flex-col max-w-xl pb-96 gap-y-12 mx-auto py-20 antialiased`}
       >
         <div className="flex flex-col justify-center items-center">
           <div className="flex gap-x-3 text-3xl">
@@ -166,6 +183,7 @@ export default function Home() {
           href={process.env.NEXT_PUBLIC_GITHUB_URL || ""}
           target="_blank"
           rel="noopener noreferrer"
+          className="mx-auto"
         >
           <Button onClick={() => {}}>
             <div className="flex gap-x-2 items-center">
@@ -198,7 +216,7 @@ export default function Home() {
             </Button>
             <Button onClick={createMerkleTree}>
               {creatingMerkleTree
-                ? `Creating tree ${percentageProgress}%`
+                ? `Creating proof ${percentageProgress}% ${proofsPerSecond} proofs/s`
                 : "Create merkle tree"}
             </Button>
           </Section>
@@ -230,11 +248,12 @@ export default function Home() {
                 subtitle="In case you don't want to use the Next.js API."
               />
 
-              <div className="p-4 overflow-x-auto bg-black border max-h-40">
-                <p className="text-xs whitespace-pre-wrap font-ibm-mono">
-                  {JSON.stringify(proofs, null, 2)}
-                </p>
-              </div>
+              <textarea
+                className="h-72 text-xs bg-black outline-none p-2 text-white border  font-ibm-mono"
+                readOnly
+              >
+                {JSON.stringify(proofs, null, 2)}
+              </textarea>
 
               <Button onClick={() => downloadProofsAsJSON(proofs)}>
                 Download as JSON
@@ -247,19 +266,72 @@ export default function Home() {
                 subtitle="Ready to use typescript API for Next.js"
               />
               <NextJsGuide />
-              <Button onClick={() => downloadAsNextJsApi(proofs)}>
-                Download as Next.js API
+              <Button onClick={() => downloadMerkleTs()}>
+                Download merkle.ts
+              </Button>
+              <Button onClick={() => downloadProofsTs(proofs)}>
+                Download proofs.ts
               </Button>
             </Section>
           </div>
 
-          <div className="flex flex-col gap-y-2">
-            <SectionTitle
-              title="Solidity example"
-              subtitle="The merkle proof verification happens at line 26."
-            />
-            <SolidityCodeSnippet />
-          </div>
+          <Section>
+            <SectionTitle title="Solidity example" />
+
+            <div className="flex gap-x-2">
+              <button
+                className={`p-2 px-4 ${
+                  snippetBeingShowed === "optimized"
+                    ? "border-blue-500"
+                    : "border-gray-500"
+                } border-2`}
+                onClick={() => setSnippetBeingShowed("optimized")}
+              >
+                Optimized
+              </button>
+              <button
+                className={`p-2  px-4 ${
+                  snippetBeingShowed === "unoptimized"
+                    ? "border-blue-500"
+                    : "border-white"
+                } border-2`}
+                onClick={() => setSnippetBeingShowed("unoptimized")}
+              >
+                Unoptimized
+              </button>
+            </div>
+
+            {snippetBeingShowed === "optimized" && (
+              <>
+                <p>
+                  Use{" "}
+                  <a
+                    className="text-blue-500"
+                    href="https://github.com/chiru-labs/ERC721A"
+                  >
+                    ERC721A
+                  </a>{" "}
+                  and{" "}
+                  <a
+                    className="text-blue-500"
+                    href="https://github.com/Vectorized/solady/tree/main/src/utils"
+                  >
+                    Solady
+                  </a>{" "}
+                  instead of Open Zeppelin. <br />
+                  They are more gas efficient.
+                </p>
+                <SolidityOptimizedCodeSnippet />
+              </>
+            )}
+
+            {snippetBeingShowed === "unoptimized" && (
+              <>
+                <p>This is inefficient and not recommended.</p>
+                <SolidityCodeSnippet />
+              </>
+            )}
+          </Section>
         </div>
       </main>
     </>
