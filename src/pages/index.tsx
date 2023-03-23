@@ -43,6 +43,24 @@ export default function Home() {
   const [addressCount, setAddressCount] = useState(0);
   const [copied, setCopied] = useState(false);
 
+  const [percentageProgress, setPercentageProgress] = useState(0);
+  const [creatingMerkleTree, setCreatingMerkleTree] = useState(false);
+
+  const fillWithRandomAddresses = () => {
+    const randomAddresses = [];
+
+    for (let i = 0; i < 5000; i++) {
+      let randomAddress = "0x";
+      for (let j = 0; j < 40; j++) {
+        randomAddress += Math.floor(Math.random() * 16).toString(16);
+      }
+      randomAddresses.push(randomAddress);
+    }
+
+    setAddressInput(randomAddresses.join("\n"));
+    setAddresses(randomAddresses);
+  };
+
   const onCopyRoot = () => {
     if (copied) return;
     navigator.clipboard.writeText(merkleRoot || "");
@@ -50,24 +68,65 @@ export default function Home() {
     setTimeout(() => setCopied(false), 1000);
   };
 
-  const getMerkleProof = (tree: MerkleTree, address: string) => {
-    return tree.getHexProof(keccak256(address));
-  };
-
-  const createMerkleTree = () => {
-    const leaves = addresses.map(addr => keccak256(addr))
+  const getRootAndTree = () => {
+    const leaves = addresses.map((addr) => keccak256(addr));
     const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
     const root = tree.getHexRoot();
 
-    const proofs: { [address: string]: string[] } = {};
-
-    addresses.forEach((address) => {
-      proofs[address.toLowerCase()] = getMerkleProof(tree, address);
-    });
-
-    setProofs(proofs);
-    setMerkleRoot(root);
     setMerkleTree(tree);
+    setMerkleRoot(root);
+  };
+
+  const createMerkleTree = async () => {
+    setCreatingMerkleTree(true);
+    setPercentageProgress(0);
+
+    let proofs: { [address: string]: string[] } = {};
+
+    const maxWorkers = 5;
+    const desiredChunkSize = 1000;
+    const workerCount = Math.min(
+      Math.ceil(addresses.length / desiredChunkSize),
+      maxWorkers
+    );
+    const chunkSize = Math.ceil(addresses.length / workerCount);
+
+    let progress = 0;
+    let finishedWorkers = 0;
+    for (let i = 0; i < workerCount; i++) {
+      const worker = new Worker(new URL(".././worker.ts", import.meta.url));
+
+      worker.postMessage({
+        addresses,
+        startingIndex: i * chunkSize,
+        chunkSize,
+      });
+      worker.onmessage = (e) => {
+        const { type } = e.data;
+
+        if (type === "progress") {
+          progress += 100;
+          // Round to closest int
+          setPercentageProgress(
+            Math.round((progress / addresses.length) * 100)
+          );
+        } else if (type === "proofs") {
+          const { proofs: generatedProofs } = e.data;
+          proofs = { ...proofs, ...generatedProofs };
+          finishedWorkers++;
+          // Kill worker
+          worker.terminate();
+        }
+      };
+    }
+
+    while (finishedWorkers < workerCount) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    getRootAndTree();
+    setProofs(proofs);
+    setCreatingMerkleTree(false);
   };
 
   useEffect(() => {
@@ -97,24 +156,27 @@ export default function Home() {
         <div className="flex flex-col justify-center items-center">
           <div className="flex gap-x-3 text-3xl">
             <h1 className="font-black ">Merkle Machine</h1>
-            <p className="animate-spin">
-              ⚙️
-            </p>
-            <p className="animate-bounce">
-              🌲
-            </p>
+            <p className="animate-spin">⚙️</p>
+            <p className="animate-bounce">🌲</p>
           </div>
           <p>Generate merkle trees for ethereum smart contracts</p>
         </div>
 
-        <Link href={process.env.NEXT_PUBLIC_GITHUB_URL || ""} target="_blank" rel="noopener noreferrer">
-          <Button onClick={() => { }}>
+        <Link
+          href={process.env.NEXT_PUBLIC_GITHUB_URL || ""}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button onClick={() => {}}>
             <div className="flex gap-x-2 items-center">
-              <p>
-                View source on Github
-              </p>
+              <p>View source on Github</p>
 
-              <Image src="/github-mark-white.png" width={20} height={20} alt="Github logo" />
+              <Image
+                src="/github-mark-white.png"
+                width={20}
+                height={20}
+                alt="Github logo"
+              />
             </div>
           </Button>
         </Link>
@@ -131,12 +193,20 @@ export default function Home() {
               onChange={(e) => setAddressInput(e.target.value)}
               autoFocus
             />
-            <Button onClick={createMerkleTree}>Create Merkle tree</Button>
+            <Button onClick={fillWithRandomAddresses}>
+              Fill with random addresses
+            </Button>
+            <Button onClick={createMerkleTree}>
+              {creatingMerkleTree
+                ? `Creating tree ${percentageProgress}%`
+                : "Create merkle tree"}
+            </Button>
           </Section>
 
           <div
-            className={`flex flex-col gap-y-16 ${!merkleRoot && "opacity-60 pointer-events-none"
-              }`}
+            className={`flex flex-col gap-y-16 ${
+              !merkleRoot && "opacity-60 pointer-events-none"
+            }`}
           >
             <Section>
               <SectionTitle

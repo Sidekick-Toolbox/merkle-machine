@@ -6,7 +6,6 @@ specifiers:
   '@types/react': 18.0.28
   '@types/react-dom': 18.0.11
   autoprefixer: ^10.4.14
-  crypto-js: ^4.1.1
   keccak256: ^1.0.6
   merkletreejs: ^0.3.9
   next: 13.2.4
@@ -21,7 +20,6 @@ dependencies:
   '@types/node': 18.15.5
   '@types/react': 18.0.28
   '@types/react-dom': 18.0.11
-  crypto-js: 4.1.1
   keccak256: 1.0.6
   merkletreejs: 0.3.9
   next: 13.2.4_biqbaboplfbrettd7655fr4n2y
@@ -688,10 +686,6 @@ packages:
 
   /crypto-js/3.3.0:
     resolution: {integrity: sha512-DIT51nX0dCfKltpRiXV+/TVZq+Qq2NgF4644+K7Ttnla7zEzqc+kjJyiB96BHNyUTBxyjzRcZYpUdZa+QAqi6Q==}
-    dev: false
-
-  /crypto-js/4.1.1:
-    resolution: {integrity: sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==}
     dev: false
 
   /css-color-keywords/1.0.0:
