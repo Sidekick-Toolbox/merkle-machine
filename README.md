@@ -4,7 +4,7 @@ Website for making merkle trees. Can be used to make whitelists/allowlists for N
 
 ## How to use
 
-1. Visit the [Merkle Machine](https://merkle-machine.vercel.app/) website.
+1. Visit the [Merkle Machine](https://www.merklemachine.xyz) website.
 2. Enter the addresses for which you want to create a Merkle tree.
 3. Click "Create Merkle tree" to generate the Merkle root.
 4. Copy or download the Merkle root as a TXT or JSON file, or as a TypeScript API for a Next.js project.
@@ -13,7 +13,7 @@ Website for making merkle trees. Can be used to make whitelists/allowlists for N
 To use with Next.js, setup your Next typescript project first
 You can do that by following [this guide](https://nextjs.org/docs/getting-started)
 
-Then download the TypeScript files from [Merkle Machine](https://merkle-machine.vercel.app/) website.
+Then download the TypeScript files from [Merkle Machine](https://www.merklemachine.xyz) website.
 And place them into your project like this
 ```
 /src
@@ -24,7 +24,7 @@ proofs.ts <-- here
 ```
 You can now retrieve merkle proofs from /merkle?address=YOUR_ADDRESS_HERE
 
-Here is an [example](https://merkle-machine.vercel.app/api/merkle?address=0x70804f88A50090770cBdA783d52160E7E95d7822)
+Here is an [example](https://www.merklemachine.xyz/api/merkle?address=0x70804f88A50090770cBdA783d52160E7E95d7822)
 
 ## Solidity example
 This is how the proof verified within solidity, making sure only allowed people can mint.
