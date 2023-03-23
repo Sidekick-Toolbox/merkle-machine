@@ -251,9 +251,8 @@ export default function Home() {
               <textarea
                 className="h-72 text-xs bg-black outline-none p-2 text-white border  font-ibm-mono"
                 readOnly
-              >
-                {JSON.stringify(proofs, null, 2)}
-              </textarea>
+                value={JSON.stringify(proofs, null, 2)}
+              />
 
               <Button onClick={() => downloadProofsAsJSON(proofs)}>
                 Download as JSON
