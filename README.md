@@ -28,6 +28,10 @@ Here is an [example](https://www.merklemachine.xyz/api/merkle?address=0x70804f88
 
 ## Solidity example
 This is how the proof verified within solidity, making sure only allowed people can mint.
+
+Use [ERC721A](https://github.com/chiru-labs/ERC721A) and [Solady](https://github.com/Vectorized/solady/tree/main/src/utils) 
+instead of Open Zeppelin. They are more gas efficient.
+
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
