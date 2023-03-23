@@ -6,6 +6,7 @@ import MerkleTree from "merkletreejs";
 import keccak256 from "keccak256";
 
 import {
+  downloadAddressesTs,
   downloadProofsAsJSON,
   downloadProofsTs,
   downloadRootAsTxt,
@@ -18,6 +19,7 @@ import Button from "../components/Button";
 import Section from "@/components/Section";
 import Link from "next/link";
 import { downloadMerkleTs } from "../download";
+import TypescriptSnippet from "../components/TypescriptSnippet";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -330,6 +332,17 @@ export default function Home() {
                 <SolidityCodeSnippet />
               </>
             )}
+          </Section>
+
+          <Section>
+            <SectionTitle
+              title="TypeScript proof generation"
+              subtitle="In case you wan't to generate the proofs yourself."
+            />
+            <TypescriptSnippet />
+            <Button onClick={() => downloadAddressesTs(addresses)}>
+              Download addresses.ts
+            </Button>
           </Section>
         </div>
       </main>

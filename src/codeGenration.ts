@@ -29,3 +29,10 @@ export const generateProofsCode = (proofs: { [key: string]: string[] }): string 
     
 };
 
+export const generateAddressCode = (addresses: string[]): string => {
+    return `export const addresses = ${JSON.stringify(
+        addresses,
+        null,
+        2
+    )} as string[];`;
+}

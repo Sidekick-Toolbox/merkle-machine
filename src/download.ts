@@ -1,4 +1,4 @@
-import { generateNextJsApiCode, generateProofsCode } from "./codeGenration";
+import { generateAddressCode, generateNextJsApiCode, generateProofsCode } from "./codeGenration";
 
 export const downloadMerkleTs = () => {
   const apiCode = generateNextJsApiCode();
@@ -8,6 +8,11 @@ export const downloadMerkleTs = () => {
 export const downloadProofsTs = (proofs: { [key: string]: string[] }) => {
   const proofsCode = generateProofsCode(proofs);
   downloadTypescriptFile(proofsCode, "proofs");
+};
+
+export const downloadAddressesTs = (addresses: string[]) => {
+  const addressesCode = generateAddressCode(addresses);
+  downloadTypescriptFile(addressesCode, "addresses");
 };
 
 const downloadTypescriptFile = (code: string, filename: string): void => {
