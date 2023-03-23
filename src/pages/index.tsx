@@ -256,7 +256,7 @@ export default function Home() {
           <div className="flex flex-col gap-y-2">
             <SectionTitle
               title="Solidity example"
-              subtitle="The merkle proof verification happens at line 18."
+              subtitle="The merkle proof verification happens at line 26."
             />
             <SolidityCodeSnippet />
           </div>
