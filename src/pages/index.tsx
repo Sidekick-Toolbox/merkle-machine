@@ -246,6 +246,20 @@ export default function Home() {
 
             <Section>
               <SectionTitle
+                title="Download as Next.js API"
+                subtitle="Ready to use typescript API for Next.js"
+              />
+              <NextJsGuide />
+              <Button onClick={() => downloadMerkleTs()}>
+                Download merkle.ts
+              </Button>
+              <Button onClick={() => downloadProofsTs(proofs)}>
+                Download proofs.ts
+              </Button>
+            </Section>
+
+            <Section>
+              <SectionTitle
                 title="Download as JSON"
                 subtitle="In case you don't want to use the Next.js API."
               />
@@ -258,20 +272,6 @@ export default function Home() {
 
               <Button onClick={() => downloadProofsAsJSON(proofs)}>
                 Download as JSON
-              </Button>
-            </Section>
-
-            <Section>
-              <SectionTitle
-                title="Download as Next.js API"
-                subtitle="Ready to use typescript API for Next.js"
-              />
-              <NextJsGuide />
-              <Button onClick={() => downloadMerkleTs()}>
-                Download merkle.ts
-              </Button>
-              <Button onClick={() => downloadProofsTs(proofs)}>
-                Download proofs.ts
               </Button>
             </Section>
           </div>
