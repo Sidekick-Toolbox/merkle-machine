@@ -30,26 +30,41 @@ Here is an [example](https://www.merklemachine.xyz/api/merkle?address=0x70804f88
 This is how the proof verified within solidity, making sure only allowed people can mint.
 ```solidity
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.13;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "erc721a/contracts/ERC721A.sol";
+import "vectorized/solady/src/utils/MerkleProofLib.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract WhitelistMint is ERC721 {
+
+contract WhitelistMint is ERC721A, Ownable {
+
+    error InvalidProof();
+    error AlreadyMinted();
+
     bytes32 merkleRoot;
-    uint256 tokenIdCounter;
 
-    constructor(bytes32 _merkleRoot) ERC721("WhitelistMint", "WM") {
+    constructor(bytes32 _merkleRoot) ERC721A("WhitelistMint", "WM") {
         merkleRoot = _merkleRoot;
     }
 
-    function mint(bytes32[] memory _merkleProof) public {
+    /// @dev Mints a token to the msg.sender, if the merkle proof is valid.
+    /// @param _merkleProof The merkle proof that will be used for verification.
+    function mint(bytes32[] calldata _merkleProof) external {
         // This is where the merkle proof verification happens
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
-        require(MerkleProof.verify(_merkleProof, merkleRoot, leaf), "Incorrect proof");
+        if (!MerkleProofLib.verifyCalldata(_merkleProof, merkleRoot, leaf)) revert InvalidProof(); 
 
-        _mint(msg.sender, tokenIdCounter);
-        tokenIdCounter++;
+        if (_getAux(msg.sender) != 0) revert AlreadyMinted(); // We check if the proof has been used before.
+
+        _setAux(msg.sender, 1); // We set the aux to 1, to indicate that the proof has been used.
+        _mint(msg.sender, 1); // to, quantity
+    }
+
+    /// @dev Sets the merkle root to a new value.
+    /// @param _merkleRoot The new merkle root.
+    function setMerkleRoot(bytes32 _merkleRoot) external onlyOwner {
+        merkleRoot = _merkleRoot;
     }
 }
 ```
