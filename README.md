@@ -34,7 +34,7 @@ pragma solidity ^0.8.13;
 
 import "erc721a/contracts/ERC721A.sol";
 import "vectorized/solady/src/utils/MerkleProofLib.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "vectorized/solady/src/auth/Ownable.sol";
 
 
 contract WhitelistMint is ERC721A, Ownable {
@@ -45,12 +45,13 @@ contract WhitelistMint is ERC721A, Ownable {
     bytes32 merkleRoot;
 
     constructor(bytes32 _merkleRoot) ERC721A("WhitelistMint", "WM") {
-        merkleRoot = _merkleRoot;
+        merkleRoot = _merkleRoot; // Adds initial merkle root.
+        _initializeOwner(msg.sender); // Initializes the owner directly without authorization guard.
     }
 
     /// @dev Mints a token to the msg.sender, if the merkle proof is valid.
     /// @param _merkleProof The merkle proof that will be used for verification.
-    function mint(bytes32[] calldata _merkleProof) external {
+    function mint(bytes32[] calldata _merkleProof) external payable {
         // This is where the merkle proof verification happens
         bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
         if (!MerkleProofLib.verifyCalldata(_merkleProof, merkleRoot, leaf)) revert InvalidProof(); 
