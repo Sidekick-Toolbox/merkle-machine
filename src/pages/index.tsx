@@ -337,7 +337,7 @@ export default function Home() {
           <Section>
             <SectionTitle
               title="TypeScript proof generation"
-              subtitle="In case you wan't to generate the proofs yourself."
+              subtitle="In case you want to generate the proofs yourself."
             />
             <TypescriptSnippet />
             <Button onClick={() => downloadAddressesTs(addresses)}>
